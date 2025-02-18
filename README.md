@@ -2,6 +2,8 @@
 
 A Python script to download media from Telegram channels based on reactions and user interactions.
 
+![Duck Charts Example](duck-charts.jpg)
+
 ## Features
 
 - Download media with reactions
