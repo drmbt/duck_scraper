@@ -18,6 +18,7 @@ __pycache__/
 download*
 download*
 *download*
+*telegram*
 
 # IDE specific files
 .idea/
