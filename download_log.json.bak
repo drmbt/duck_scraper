@@ -1,0 +1,111 @@
+{
+  "last_scan_time": "2025-02-18T02:08:23.386687+00:00",
+  "messages": {
+    "222": {
+      "id": 222,
+      "timestamp": "250122_2026",
+      "date_iso": "2025-01-22T20:26:24+00:00",
+      "url": "https://t.me/mechanicalduck/222",
+      "reply_text": "no_reply_text",
+      "reply_user_id": null,
+      "reply_username": null,
+      "reply_name": null,
+      "has_reactions": true,
+      "my_reaction": false,
+      "total_reactions": 1,
+      "reactions": [
+        {
+          "emoji": "\ud83e\udee1",
+          "count": 1
+        }
+      ],
+      "base_filename": "250122_2026_unnamed_r1_no_reply_text",
+      "downloaded": false
+    },
+    "372": {
+      "id": 372,
+      "timestamp": "250122_2040",
+      "date_iso": "2025-01-22T20:40:33+00:00",
+      "url": "https://t.me/mechanicalduck/372",
+      "reply_text": "no_reply_text",
+      "reply_user_id": null,
+      "reply_username": null,
+      "reply_name": null,
+      "has_reactions": true,
+      "my_reaction": false,
+      "total_reactions": 1,
+      "reactions": [
+        {
+          "emoji": "\ud83d\udc4c",
+          "count": 1
+        }
+      ],
+      "base_filename": "250122_2040_unnamed_r1_no_reply_text",
+      "downloaded": false
+    },
+    "629": {
+      "id": 629,
+      "timestamp": "250122_2057",
+      "date_iso": "2025-01-22T20:57:21+00:00",
+      "url": "https://t.me/mechanicalduck/629",
+      "reply_text": "no_reply_text",
+      "reply_user_id": null,
+      "reply_username": null,
+      "reply_name": null,
+      "has_reactions": true,
+      "my_reaction": false,
+      "total_reactions": 1,
+      "reactions": [
+        {
+          "emoji": "\u2764",
+          "count": 1
+        }
+      ],
+      "base_filename": "250122_2057_unnamed_r1_no_reply_text",
+      "downloaded": false
+    },
+    "1065": {
+      "id": 1065,
+      "timestamp": "250122_2144",
+      "date_iso": "2025-01-22T21:44:47+00:00",
+      "url": "https://t.me/mechanicalduck/1065",
+      "reply_text": "no_reply_text",
+      "reply_user_id": null,
+      "reply_username": null,
+      "reply_name": null,
+      "has_reactions": true,
+      "my_reaction": false,
+      "total_reactions": 1,
+      "reactions": [
+        {
+          "emoji": "\ud83d\udc4c",
+          "count": 1
+        }
+      ],
+      "base_filename": "250122_2144_unnamed_r1_no_reply_text",
+      "downloaded": false
+    },
+    "1126": {
+      "id": 1126,
+      "timestamp": "250122_2149",
+      "date_iso": "2025-01-22T21:49:38+00:00",
+      "url": "https://t.me/mechanicalduck/1126",
+      "reply_text": "no_reply_text",
+      "reply_user_id": null,
+      "reply_username": null,
+      "reply_name": null,
+      "has_reactions": true,
+      "my_reaction": false,
+      "total_reactions": 1,
+      "reactions": [
+        {
+          "emoji": "\ud83d\udd25",
+          "count": 1
+        }
+      ],
+      "base_filename": "250122_2149_unnamed_r1_no_reply_text",
+      "downloaded": false
+    }
+  },
+  "last_successful_id": null
+}
