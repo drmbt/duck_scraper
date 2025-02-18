@@ -24,6 +24,7 @@ First Time Setup:
    API_ID=your_api_id
    API_HASH=your_api_hash
    CHANNEL_USERNAME=target_channel_username
+   TOPIC_ID=0  # Default to 0 for main channel
    
    Note: CHANNEL_USERNAME should be without the @ symbol
 
@@ -85,6 +86,7 @@ DOWNLOAD_DIRS = {
 }
 
 LOG_FILE = 'download_log.json'
+CHECKPOINT_INTERVAL = 10  # Save log every 10 successful downloads
 
 # Argument parser
 parser = argparse.ArgumentParser(description='Download media from Telegram channel based on reactions')
@@ -107,6 +109,7 @@ load_dotenv()
 api_id = os.getenv('API_ID')
 api_hash = os.getenv('API_HASH')
 channel_username = os.getenv('CHANNEL_USERNAME')
+topic_id = int(os.getenv('TOPIC_ID', 0))  # Default to 0 for main channel
 
 # Validate environment variables
 if not all([api_id, api_hash, channel_username]):
@@ -163,17 +166,35 @@ def load_log_file():
         'last_successful_id': None  # Track last successfully downloaded message
     }
 
-def save_log_file(log_data):
-    """Save log file with download information"""
-    # Create backup of existing log
-    if os.path.exists(LOG_FILE):
-        import shutil
-        backup_name = f"{LOG_FILE}.bak"
-        shutil.copy2(LOG_FILE, backup_name)
+def save_checkpoint(log_data, force=False, is_final=False):
+    """Save log data based on checkpoint conditions"""
+    # Get the count of downloaded files
+    downloaded_count = sum(1 for msg in log_data['messages'].values() 
+                         if msg.get('downloaded', False))
     
-    # Save new log
-    with open(LOG_FILE, 'w') as f:
-        json.dump(log_data, f, indent=2)
+    # Save if:
+    # 1. This is a forced save, or
+    # 2. This is the final save, or
+    # 3. We've hit our checkpoint interval
+    if force or is_final or (downloaded_count % CHECKPOINT_INTERVAL == 0):
+        # Only create backup on first save
+        if not hasattr(save_checkpoint, 'has_backup'):
+            if os.path.exists(LOG_FILE):
+                import shutil
+                backup_name = f"{LOG_FILE}.bak"
+                shutil.copy2(LOG_FILE, backup_name)
+            save_checkpoint.has_backup = True
+        
+        # Save current state
+        with open(LOG_FILE, 'w') as f:
+            json.dump(log_data, f, indent=2)
+        
+        if is_final:
+            print("Final log save completed")
+        elif force:
+            print("Forced log checkpoint saved")
+        else:
+            print(f"Checkpoint saved at {downloaded_count} downloads")
 
 def sanitize_filename(text, max_length=50):
     """
@@ -245,7 +266,11 @@ async def get_qualified_messages(channel):
     print("\nScanning messages from oldest to newest...")
     
     # Get messages in chronological order (oldest first)
-    async for message in client.iter_messages(channel, reverse=True):
+    async for message in client.iter_messages(
+        channel, 
+        reverse=True,
+        reply_to=topic_id
+    ):
         processed += 1
         if processed % 100 == 0:
             print(f"Scanning: {processed}/{total_messages.total} messages")
@@ -269,11 +294,11 @@ async def get_qualified_messages(channel):
                         if reply.sender:
                             reply_user_id = reply.sender.id
                             reply_username = getattr(reply.sender, 'username', None)
-                            # Get the most readable name available
+                            # Get the most readable name available, handling None values
+                            first_name = getattr(reply.sender, 'first_name', '') or ''
+                            last_name = getattr(reply.sender, 'last_name', '') or ''
                             reply_name = (
-                                getattr(reply.sender, 'first_name', '') + 
-                                ' ' + 
-                                getattr(reply.sender, 'last_name', '')
+                                f"{first_name} {last_name}"
                             ).strip() or reply_username or str(reply_user_id)
                 
                 # Ensure we have valid text
@@ -351,7 +376,7 @@ async def get_qualified_messages(channel):
     
     # Update log file with new timestamp and messages
     log_data['last_scan_time'] = datetime.now(timezone.utc).isoformat()
-    save_log_file(log_data)
+    save_checkpoint(log_data)
     
     print(f"\nScan complete!")
     print(f"Processed {processed} messages")
@@ -424,7 +449,11 @@ async def download_reacted_media():
                 continue
                 
             try:
-                message = await client.get_messages(channel, ids=msg_info['id'])
+                message = await client.get_messages(
+                    channel, 
+                    ids=msg_info['id'],
+                    reply_to=topic_id
+                )
                 if not message:
                     raise Exception(f"Message {msg_info['id']} not found")
                 
@@ -505,7 +534,11 @@ async def download_reacted_media():
                 continue
                 
             try:
-                message = await client.get_messages(channel, ids=msg_info['id'])
+                message = await client.get_messages(
+                    channel, 
+                    ids=msg_info['id'],
+                    reply_to=topic_id
+                )
                 
                 while True:
                     try:
@@ -526,7 +559,7 @@ async def download_reacted_media():
                 log_data['messages'][str(msg_info['id'])]['downloaded'] = True
                 if msg_info['id'] > log_data.get('last_successful_id', 0):
                     log_data['last_successful_id'] = msg_info['id']
-                save_log_file(log_data)
+                save_checkpoint(log_data)
                 
             except Exception as e:
                 error_msg = f"Failed to download message {msg_info['id']}: {str(e)}"
@@ -564,6 +597,9 @@ async def download_reacted_media():
             last_id = log_data.get('last_successful_id')
             if last_id is None or attempt['id'] > last_id:
                 log_data['last_successful_id'] = attempt['id']
+            
+            # Save checkpoint after successful verification
+            save_checkpoint(log_data)
         else:
             print(f"Size mismatch for {path}")
             failed_downloads.append({
@@ -573,7 +609,7 @@ async def download_reacted_media():
             os.remove(path)
 
     # Update log file
-    save_log_file(log_data)
+    save_checkpoint(log_data, is_final=True)
     
     # Return results without printing report
     return media_data, successful_downloads, failed_downloads
